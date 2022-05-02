@@ -71,6 +71,7 @@ function devHTML() {
       prefix: '@@',
       basepath: options.paths.src.includeHtml
     }))
+    .pipe(prettyHtml())
     .pipe(dest(options.paths.dist.base));
 }
 
