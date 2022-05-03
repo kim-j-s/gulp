@@ -1,10 +1,3 @@
-/**
- *   Gulp with TailwindCSS - An CSS Utility framework                                
- *   Author : Manjunath G                                              
- *   URL : manjumjn.com | lazymozek.com
- *   Twitter : twitter.com/manju_mjn                                    
- **/
-
 /*
   Usage:
   1. npm install //To install all dev dependencies of package
@@ -25,18 +18,14 @@ const options = require("./config"); //paths and other options from config.js
 const browserSync = require('browser-sync').create();
 
 const sass = require('gulp-sass'); //For Compiling SASS files
-const postcss = require('gulp-postcss'); //For Compiling tailwind utilities with tailwind config
+// const postcss = require('gulp-postcss'); //For Compiling tailwind utilities with tailwind config
 const autoprefixer = require('gulp-autoprefixer'); // -webkit
 const concat = require('gulp-concat'); //For Concatinating js,css files
 const uglify = require('gulp-terser'); //To Minify JS files
-const imagemin = require('gulp-imagemin'); //To Optimize Images
 const cleanCSS = require('gulp-clean-css'); //To Minify CSS files
-const purgecss = require('gulp-purgecss'); // Remove Unused CSS from Styles
 const fileinclude = require('gulp-file-include'); //파일인클루드 추가
 const prettyHtml = require('gulp-pretty-html'); //추가
-const count = require('gulp-file-count');
-const FileCache = require("gulp-file-cache");
-const fileCache = new FileCache();
+const sourcemaps = require('gulp-sourcemaps');
 
 //Note : Webp still not supported in major browsers including forefox
 //const webp = require('gulp-webp'); //For converting images to WebP format
@@ -100,8 +89,10 @@ function devGuideImages() {
 
 function devStyles() {
   return src(`${options.paths.src.css}/**/*.*`)
+    .pipe(sourcemaps.init())
     .pipe(sass({ outputStyle: 'expanded' }).on('error', sass.logError))
     .pipe(autoprefixer())
+    .pipe(sourcemaps.write())
     .pipe(dest(options.paths.dist.css));
 }
 
@@ -129,61 +120,6 @@ function devClean() {
   return del([options.paths.dist.base]);
 }
 
-//Production Tasks (Optimized Build for Live/Production Sites)
-function prodHTML() {
-  return src([
-      `${options.paths.src.base}/**/*.html`,
-      `!${options.paths.src.base}/**/_*.html`
-    ])
-    .pipe(fileinclude({
-      prefix: '@@',
-      basepath: options.paths.src.includeHtml
-    }))
-    .pipe(dest(options.paths.build.base));
-}
-
-function prodStyles() {
-  return src(`${options.paths.dist.css}/**/*`)
-    .pipe(purgecss({
-      content: ['src/**/*.{html,js}'],
-      defaultExtractor: content => {
-        const broadMatches = content.match(/[^<>"'`\s]*[^<>"'`\s:]/g) || []
-        const innerMatches = content.match(/[^<>"'`\s.()]*[^<>"'`\s.():]/g) || []
-        return broadMatches.concat(innerMatches)
-      }
-    }))
-    .pipe(cleanCSS({
-      compatibility: 'ie8'
-    }))
-    .pipe(dest(options.paths.build.css));
-}
-
-function prodScripts() {
-  return src([
-      `${options.paths.src.js}/libs/**/*.js`,
-      `${options.paths.src.js}/**/*.js`
-    ])
-    .pipe(concat({
-      path: options.paths.build.jsFile + '.js'
-    }))
-    .pipe(uglify())
-    .pipe(dest(options.paths.build.js));
-}
-
-function prodImages() {
-  return src(options.paths.src.img + '/**/*').pipe(imagemin()).pipe(dest(options.paths.build.img));
-}
-
-function prodClean() {
-  console.log("\n\t" + logSymbols.info, "Cleaning build folder for fresh start.\n");
-  return del([options.paths.build.base]);
-}
-
-function buildFinish(done) {
-  console.log("\n\t" + logSymbols.info, `Production build is complete. Files are located at ${options.paths.build.base}\n`);
-  done();
-}
-
 exports.default = series(
   devClean, // Clean Dist Folder
   parallel(devStyles, devScripts, devImages, devHTML, devFont, devGuide, devGuideImages), //Run All tasks in parallel
@@ -191,10 +127,3 @@ exports.default = series(
   watchFiles // Watch for Live Changes
 );
 
-/*
-exports.prod = series(
-  prodClean, // Clean Build Folder
-  parallel(prodStyles, prodScripts, prodImages, prodHTML), //Run All tasks in parallel
-  buildFinish
-);
-*/
