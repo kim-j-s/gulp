@@ -1,7 +1,6 @@
 module.exports = {
 	config: {
-		tailwindjs: "./tailwind.config.js",
-		port: 9050
+		port: 8050
 	},
 	paths: {
 		root: "./",
