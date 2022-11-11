@@ -17,7 +17,8 @@ const del = require('del'); //For Cleaning build/dist for fresh export
 const options = require("./config"); //paths and other options from config.js
 const browserSync = require('browser-sync').create();
 
-const sass = require('gulp-sass'); //For Compiling SASS files
+// const sass = require('gulp-sass'); //For Compiling SASS files
+const sass = require('gulp-sass')(require('sass'));
 const postcss = require('gulp-postcss'); //For Compiling tailwind utilities with tailwind config
 const pxtorem = require('postcss-pxtorem');
 const autoprefixer = require('gulp-autoprefixer'); // -webkit
